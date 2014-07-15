@@ -1,0 +1,83 @@
+<div id="map"></div>
+
+<script>
+
+// load map
+var map = L.map('map');
+L.esri.basemapLayer("Gray").addTo(map);
+
+// parse triggers
+var triggerList = JSON.parse('<%= @trigger_list.to_json %>');
+
+// set bounding box
+var cs = triggerList.boundingBox.coordinates[0];
+var sw = new L.LatLng(cs[0][1], cs[0][0]);
+var ne = new L.LatLng(cs[2][1], cs[2][0]);
+var bounds = new L.LatLngBounds(sw, ne);
+map.fitBounds(bounds);
+
+// create geojson layer
+var locLayer = L.geoJson(null, { style: { color: "#00ff00" } }).addTo(map);
+
+// show triggers
+for (var i = 0; i < triggerList.triggers.length; i++) {
+  var trigger = triggerList.triggers[i];
+  var geojson = {
+    id: trigger.triggerId,
+    type: "Feature",
+    properties: null,
+    geometry: trigger.condition.geo.geojson
+  };
+  locLayer.addData(geojson);
+}
+
+// load biker icon
+var bikerIcon = L.icon({ iconUrl: '/img/biker.png' });
+var biker;
+
+// show biker at coords
+function showBikerAt(lat, lon) {
+  lat = lat + 0.0005;
+  lon = lon - 0.0005;
+  ll = new L.LatLng(lat, lon);
+  console.log(ll);
+  if (!biker) {
+    biker = L.marker(ll, {icon: bikerIcon});
+    console.log(biker);
+    biker.addTo(map);
+  } else {
+    biker.setLatLng(ll);
+  }
+}
+
+// open websocket
+var ws = new WebSocket('ws://<%= @host %>/callbacks');
+
+// set message handler
+ws.onmessage = function(msg) {
+  if (msg.data != 'pong') {
+    msg = JSON.parse(msg.data);
+
+    // trigger fire
+    if (msg.triggerId) {
+      var triggerPolygon;
+      locLayer.eachLayer(function(layer) {
+        if (layer.feature.id == msg.triggerId) {
+         triggerPolygon = layer;
+        }
+      });
+      if (triggerPolygon) {
+        triggerPolygon.setStyle({ color: '#ff0000' });
+        setTimeout(function(){ triggerPolygon.setStyle({ color: '#00ff00' }); }, 1000 );
+      }
+
+    // biker location
+    } else if (msg.bikerLoc) {
+      console.log(msg.bikerLoc.latitude, msg.bikerLoc.longitude);
+      showBikerAt(msg.bikerLoc.latitude, msg.bikerLoc.longitude);
+    }
+
+  }
+}
+
+</script>

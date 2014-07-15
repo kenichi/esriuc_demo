@@ -1,0 +1,36 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    angelo (0.1.14)
+      mime-types
+      reel
+    celluloid (0.15.2)
+      timers (~> 1.1.0)
+    celluloid-io (0.15.0)
+      celluloid (>= 0.15.0)
+      nio4r (>= 0.5.0)
+    geotrigger (0.0.9)
+      httpclient
+    http (0.6.1)
+      http_parser.rb (~> 0.6.0)
+    http_parser.rb (0.6.0)
+    httpclient (2.4.0)
+    mime-types (2.3)
+    nio4r (1.0.0)
+    reel (0.5.0)
+      celluloid (>= 0.15.1)
+      celluloid-io (>= 0.15.0)
+      http (>= 0.6.0.pre)
+      http_parser.rb (>= 0.6.0)
+      websocket_parser (>= 0.1.6)
+    tilt (2.0.1)
+    timers (1.1.0)
+    websocket_parser (0.1.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  angelo
+  geotrigger
+  tilt
